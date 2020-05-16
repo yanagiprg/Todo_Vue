@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+    integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+  <link type="text/css" rel="stylesheet" href="https://unpkg.com/bootstrap/dist/css/bootstrap.min.css" />
+  <link type="text/css" rel="stylesheet" href="https://unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.css" />
+
+  <title>TODO APP</title>
+</head>
+
+
+<body>
+  <div class="allContainer row m-2" id="app">
+    <!-- Header -->
+    <div class="header col-12">
+      <h1>
+        TO DO APP
+      </h1>
+    </div>
+    <!-- Content -->
+    <div class="contentContainer row col-12 my-2">
+      <!-- TaskList -->
+      <div class="taskListContainer col-12 my-2">
+        <div class="task-card card mb-2" v-for="(task, index) in tasks" :key="index"
+          :class="[task.completed? 'completed' :[ expiredDate(task)? expiredDate(task) : taskColors(task) ]]">
+          <h5 class="card-body p-1 px-2" v-cloak>{{task.name}}</h5>
+          <div class="card-header p-1">
+            <div class="col-12 my-2 d-flex justify-content-between">
+              <span class="card-text">優先度<span class="card-text ml-1" v-cloak>{{valueToStrings(task)}}</span></span>
+              <span class="card-text" v-show="task.deadline">期限<span class="card-text ml-1"
+                  v-cloak>{{task.deadline}}</span></span>
+              <span class="card-text" v-show="task.deadline" v-cloak>【{{expiredTask(task)}}】</span>
+            </div>
+            <div class="col-12 mb-2 d-flex justify-content-start">
+              <input type="checkbox" v-model="task.completed">
+              <span>完了</span>
+              <button @click="editTask(task)" class="btn btn-secondary btn-sm" data-target="#editModal">編集</button>
+
+              <!--Edit Modal -->
+              <div class="modal fade" id="editModal" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="editModalLabel">編集</h5>
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </div>
+                    <form name="taskForm">
+                      <div class="modal-body">
+                        <div>
+                          <label for="task-name" class="col-form-label">内容</label>
+                          <input type="text" v-model="form.name" class="form-control" id="task-name" required>
+                        </div>
+                        <div>
+                          <label for="task-priority" class="col-form-label">優先度</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                          <input class="form-check-input" v-model.lazy="form.priority" type="radio"
+                            name="inlineRadioOptions" id="high" value="-1">
+                          <label class="form-check-label" for="high">高</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                          <input class="form-check-input" v-model.lazy="form.priority" type="radio"
+                            name="inlineRadioOptions" id="mid" value="0">
+                          <label class="form-check-label" for="mid">中</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                          <input class="form-check-input" v-model.lazy="form.priority" type="radio"
+                            name="inlineRadioOptions" id="low" value="1">
+                          <label class="form-check-label" for="low">低</label>
+                        </div>
+                        <div>
+                          <label for="task-deadline" class="col-form-label">期限</label>
+                          <input type="date" v-model="form.deadline" class="form-control" id="task-deadline">
+                        </div>
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" @click="updateTask()" class="btn btn-primary">完了</button>
+                        <button type="button" @click="resetTask()" class="btn btn-secondary">クリア</button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Form -->
+      <div v-if="editing === false" class="formContainer col-12 bg-dark m-2 p-2">
+        <form name="taskForm">
+          <div class="contentContainer row mb-4">
+            <div class="contentChar col-12 row">
+              <p class="text-white col-3">内容</p>
+              <p class="badge badge-danger col-3">※必須</p>
+            </div>
+            <div class="contentInput col-12">
+              <input type="text" v-model="form.name" required placeholder="タスクを入力してください">
+            </div>
+          </div>
+          <div class="priorityContainer row mb-3">
+            <div class="priorityChar col-12 row">
+              <p class="text-white col-3">優先度</p>
+              <p class="badge badge-danger col-3">※必須</p>
+            </div>
+            <div class="priorityInput col-12">
+              <input type="radio" v-model.lazy="form.priority" id="high" value="-1">
+              <label for="high" class="text-white">高</label>
+              <input type="radio" v-model.lazy="form.priority" id="mid" value="0">
+              <label for="mid" class="text-white">中</label>
+              <input type="radio" v-model.lazy="form.priority" id="low" value="1">
+              <label for="low" class="text-white">低</label>
+            </div>
+          </div>
+          <div class="deadlineContainer row mb-4">
+            <div class="deadlineChar col-12 row">
+              <p class="text-white col-3">期限</p>
+            </div>
+            <div class="deadlineInput col-12">
+              <input type="date" v-model.lazy="form.deadline" class="col-8">
+            </div>
+          </div>
+          <div class="submitButtonsContainer row mx-1 mb-3 d-flex justify-content-start">
+            <button type="button" @click="addTask()" class="btn btn-primary col-3">追加</button>
+            <button type="button" @click="resetTask()" class="btn btn-secondary col-3 ml-3">クリア</button>
+          </div>
+        </form>
+      </div>
+      <!-- Editting Dummy Form -->
+      <div v-if="editing === true" class="formContainer col-12 bg-dark m-2 p-2">
+        <form name="taskForm">
+          <div class="contentContainer row mb-4">
+            <div class="contentChar col-12 row">
+              <p class="text-white col-3">内容</p>
+              <p class="badge badge-danger col-3">※必須</p>
+            </div>
+            <div class="contentInput col-12">
+              <input type="text" placeholder="タスクを入力してください">
+            </div>
+          </div>
+          <div class="priorityContainer row mb-3">
+            <div class="priorityChar col-12 row">
+              <p class="text-white col-3">優先度</p>
+              <p class="badge badge-danger col-3">※必須</p>
+            </div>
+            <div class="priorityInput col-12">
+              <input type="radio">
+              <label class="text-white">高</label>
+              <input type="radio" id="mid" checked>
+              <label for="mid" class="text-white">中</label>
+              <input type="radio">
+              <label for="low" class="text-white">低</label>
+            </div>
+          </div>
+          <div class="deadlineContainer row mb-4">
+            <div class="deadlineChar col-12 row">
+              <p class="text-white col-3">期限</p>
+            </div>
+            <div class="deadlineInput col-12">
+              <input type="date" class="col-8">
+            </div>
+          </div>
+          <div class="submitButtonsContainer row mx-1 mb-3 d-flex justify-content-start">
+            <button type="button" class="btn btn-primary col-3">追加</button>
+            <button type="button" class="btn btn-secondary col-3 ml-3">クリア</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Indicator -->
+      <div class="indicatorContainer col-12 row my-2">
+        <table class="col-12 m-2">
+          <tbody class="border my-2">
+            <tr class="border my-2 p-2">
+              <th class="border table-text">現在のタスク総数</th>
+              <td v-cloak>{{tasks.length}}個</td>
+            </tr>
+            <tr class="border">
+              <th class="border table-text">残タスク数</th>
+              <td v-cloak>
+                {{remaining}}個
+              </td>
+            </tr>
+            <tr class="border">
+              <th class="border table-text">完了済みタスク数</th>
+              <td v-cloak>
+                {{done}}個
+                <button @click="removeFinishedTasks" v-show="tasks.length > remaining" class="delete-text text-primary">
+                  <span>完了済みタスクを削除</span>
+                </button>
+              </td>
+            </tr>
+            <tr class="border">
+              <th class="border table-text">完遂率</th>
+              <td v-cloak>
+                {{ calcRatio }}％
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="sortContainer col-12 m-2 ">
+          <p class="mb-0">タスクの並び替え</p>
+          <div class="sortButtons btn-group row px-3 d-flex justify-content-center">
+            <button type="button" @click="sortByPriority()" class="btn btn-outline-secondary ">優先度順</button>
+            <button type="button" @click="sortByDeadline()" class="btn btn-outline-secondary ">期限順</button>
+          </div>
+          <div class="deleteButton py-2 mb-2 d-flex justify-content-center">
+            <button type="button" class="btn btn-outline-danger col-12" data-toggle="modal"
+              data-target="#alertModal">全タスク削除</button>
+            <!--Alert Modal -->
+            <div class="modal fade" id="alertModal" tabindex="-1" role="dialog" aria-labelledby="alertModal"
+              aria-hidden="true">
+              <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                  <div class="modal-body">
+                    <p>本当に全タスクを削除して良いですか？ ※復元できません</p>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">キャンセル</button>
+                    <button type="button" @click="deleteAllTasks()" class="btn btn-primary">OK</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Footer -->
+    <div class="footer col-12">
+      <h5 class="footer-title">本サイトについて</h5>
+      <p class="footer-text">閲覧推奨環境</p>
+      <p class="footer-text">PC: Chrome, Edge最新版</p>
+      <p class="footer-text">SP: iOS11.0.3以上 iOS Safari, Chrome最新版</p>
+      <a href="http://">その他使い方などはこちらから</a>
+    </div>
+
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.1/moment.min.js" type="text/javascript"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue-moment@4.1.0/dist/vue-moment.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <script src="https://unpkg.com/babel-polyfill@latest/dist/polyfill.min.js"></script>
+  <script type="text/javascript" src="./main.js"></script>
+</body>
+
+</html>

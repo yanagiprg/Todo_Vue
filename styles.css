@@ -1,0 +1,38 @@
+[v-cloak] {
+  display: none;
+}
+
+/* text */
+.card-text {
+  font-size: 8px;
+}
+
+.table-text {
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.delete-text {
+  font-size: 14px;
+}
+
+/* bg-color */
+.completed {
+  background: rgba(150, 150, 150, 0.75) !important;
+}
+
+.expired {
+  background: rgba(247, 113, 113, 0.664) !important;
+}
+
+.yellow {
+  background: rgba(252, 246, 161, 0.644) !important;
+}
+
+.white {
+  background: rgba(255, 255, 255, 0.850) !important
+}
+
+.blue {
+  background: rgba(180, 237, 252, 0.651) !important
+}
