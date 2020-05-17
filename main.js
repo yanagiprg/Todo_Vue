@@ -175,24 +175,23 @@ new Vue({
     },
 
     sortByPriority(){
-        const sorted = this.tasks.sort(function (a, b) {
-          return  a.priority < b.priority ? -1 : 
-          a.priority > b.priority ? 1 : 0
-        });
+      const sorted = this.tasks.sort(function (a, b) {
+        return  a.priority < b.priority ? 1 : 
+        a.priority > b.priority ? -1 : 0
+      });
       sorted.sort(function (p) {
         return p.completed? 1 : -1
       })
     },
 
     sortByDeadline(){
-        const sorted = this.tasks.sort(function (a, b) {
-          return  a.deadline < b.deadline ? -1 : 
-          a.deadline > b.deadline ? 1 : 0
-        });
+      const sorted = this.tasks.sort(function (a, b) {
+        return  a.deadline < b.deadline ? 1 : 
+        a.deadline > b.deadline ? -1 : 0
+      });
       sorted.sort(function (p) {
         return p.completed? 1 : -1
       })
     }
-
   }
 })
